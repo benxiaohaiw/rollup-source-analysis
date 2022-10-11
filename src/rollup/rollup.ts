@@ -166,21 +166,25 @@ function handleGenerateWrite(
 		unsetInputOptions
 	);
 	return catchUnfinishedHookActions(outputPluginDriver, async () => {
+		// 创建一个Bundle实例对象
 		const bundle = new Bundle(outputOptions, unsetOptions, inputOptions, outputPluginDriver, graph);
+		// 执行实例对象的generate函数
+		// 这里返回的是基础输出bundle - outputBundleBase对象
 		const generated = await bundle.generate(isWrite);
-		if (isWrite) {
+		if (isWrite) { // 若是需要写入
 			if (!outputOptions.dir && !outputOptions.file) {
 				return error({
 					code: 'MISSING_OPTION',
 					message: 'You must specify "output.file" or "output.dir" for the build.'
 				});
 			}
+			// 并发执行
 			await Promise.all(
-				Object.values(generated).map(chunk =>
-					graph.fileOperationQueue.run(() => writeOutputFile(chunk, outputOptions))
+				Object.values(generated).map(chunk => // 取出对象的values
+					graph.fileOperationQueue.run(() => writeOutputFile(chunk, outputOptions)) // 对bundle中每一个chunk文件进行写入到磁盘中
 				)
 			);
-			await outputPluginDriver.hookParallel('writeBundle', [outputOptions, generated]);
+			await outputPluginDriver.hookParallel('writeBundle', [outputOptions, generated]); // 并发执行writeBundle钩子函数，不关心钩子函数所返回的结果
 		}
 		return createOutput(generated);
 	});
