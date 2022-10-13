@@ -74,6 +74,11 @@ export default class Bundle {
 			timeEnd('render modules', 2);
 
 			// src
+			//   finalisers
+			//     iife.ts
+			//     es.ts
+			//     cjs.ts
+			//     index.ts
 			//   Chunk.ts
 			//   utils
 			//     renderChunk.ts
@@ -92,7 +97,9 @@ export default class Bundle {
 			// 添加这些最终块到bundle中
 			// 这一步主要逻辑是把所有的chunk实例对象相关的有用信息形成一个对象添加到输出bundle对象中
 			// 随后并发执行Chunk实例对象的render函数，在render函数中取出Chunk实例对象的renderedSource属性值
-			// 首先对其进行finalise函数的执行 -> 接着prepend addons.banner -> 再接着append addons.footer
+			// 首先对其进行finalise函数的执行，这个函数来自于当前输出选项中的格式format的值是什么，那么这个函数
+			// 就是finalisers下对应文件默认暴露的函数，这些函数主要是根据当前的format值产生最终输出代码的结构格式的，比如iife格式、es格式、commonjs格式等
+			// 转为这些最终的格式代码之后 -> 接着prepend addons.banner -> 再接着append addons.footer
 			// 产生当前的prevCode字符串 -> 接着对prevCode执行renderChunk
 			// 在renderChunk函数中主要是进行promise.then链执行插件驱动中的renderChunk钩子函数
 			// 那么prevCode就是作为第一个hook的参数，hook若返回结果那么直接把返回的结果作为下一个hook的参数
